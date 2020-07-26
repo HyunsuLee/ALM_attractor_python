@@ -46,11 +46,11 @@ ALPHA = 4.5
 # network connectivity and parameters
 # 1) 'one_hemi_multi_fp_step'
 # 2) 'one_hemi_single_fp'
-# 3) 'two_hemi_ramp' - ramp_type '2s' or 'step' must be selected
+# 3) 'two_hemi_ramp' - RAMP_TYPE '2s' or 'step' must be selected
 # 4) 'two_hemi_internal'
 
-NETWORK_STR = 'one_hemi_multi_fp_step'
-# ramp_type = '2s' ## for 'two_hemi_ramp' network architecture
+NETWORK_STR = 'one_hemi_single_fp'
+# RAMP_TYPE = '2s' ## for 'two_hemi_ramp' network architecture
 
 if NETWORK_STR == 'one_hemi_multi_fp_step':
     # one hemi Fig1b right, EDF1p-v
@@ -94,6 +94,47 @@ if NETWORK_STR == 'one_hemi_multi_fp_step':
     # amplitude of PV perturbation
     PV_VEC = [0,1,2,6]
 
+elif NETWORK_STR == 'one_hemi_single_fp':
+    # one hemi Fig1b right, EDF1p-v
+    STIM_SIGMA = 0.05 # SD of selective cue intensity
+    STIM_AMP = 0.5   # mean of selective cue intensity
+        
+    # amplitude of fast noise
+    SIGMA_NOISE = 14
+        
+    # synaptic weights(changed according to supple tables)
+    W_LL = 16
+    W_RR = W_LL
+    W_LI = 8 # pre:Inh post:Exc
+    W_IL = 4 # pre:Exc post:Inh
+    W_RI = W_LI
+    W_IR = W_IL
+    W_LR = 1 # between left-right Exc
+    W_RL = W_LR
+    W_II = 1.13
+        
+    # input currents
+    I_L = 16
+    I_R = I_L
+    I_I = 1.07
+    I_I_BSL = I_I # 뭔지 모르겠음.
+    
+    # cross-hemisphere excitation
+    W_HEMI = 0.0
+        
+    # static nonlinearity parameters
+    TAU_D = 0.0 # sec, depression recovery 
+    TAU_f = 0.05 # sec, facilitation recovery 
+    U = 0.05 # synaptic release probability 
+    
+    # Step-like ramp
+    T_RAMP_END = T_RAMP_START + 10/DT
+        
+    # amplitude of ramping at the end of delay
+    RAMP_AMP = 2
+        
+    # amplitude of PV perturbation
+    PV_VEC = [0,0.4,2,12]
 
  
 print(PV_VEC)
