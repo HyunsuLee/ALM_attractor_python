@@ -36,7 +36,6 @@ T_PV_END = T_PV_START + T_DUR_PV - 1
 
 # End of Delay epoch
 T_DELAY_END = T_STIM_END + T_DUR_DELAY
-
 T_RAMP_START = T_STIM_START
 
 # Value of ALPHA in the transduction function
@@ -49,7 +48,7 @@ ALPHA = 4.5
 # 3) 'two_hemi_ramp' - RAMP_TYPE '2s' or 'step' must be selected
 # 4) 'two_hemi_internal'
 
-NETWORK_STR = 'one_hemi_single_fp'
+NETWORK_STR = 'one_hemi_multi_fp_step'
 # RAMP_TYPE = '2s' ## for 'two_hemi_ramp' network architecture
 
 if NETWORK_STR == 'one_hemi_multi_fp_step':
@@ -135,6 +134,126 @@ elif NETWORK_STR == 'one_hemi_single_fp':
         
     # amplitude of PV perturbation
     PV_VEC = [0,0.4,2,12]
+
+elif NETWORK_STR == 'two_hemi_ramp':
+    # TODO find appropriate figure of the original paper
+    # amplitude of fast noise
+    SIGMA_NOISE = 8
+        
+    # synaptic weights(changed according to supple tables)
+    W_LL = 6.9
+    W_RR = W_LL
+    W_LI = 5 # pre:Inh post:Exc
+    W_IL = 2.64 # pre:Exc post:Inh
+    W_RI = W_LI
+    W_IR = W_IL
+    W_LR = 2.2 # between left-right Exc
+    W_RL = W_LR
+    W_II = 2
+        
+    # input currents
+    I_L = 1
+    I_R = I_L
+    I_I = 1.2
+    I_I_BSL = I_I # 뭔지 모르겠음.
+    
+    # cross-hemisphere excitation
+    W_HEMI = 0.58
+        
+    # static nonlinearity parameters
+    TAU_D = 0.1 # sec, depression recovery 
+    TAU_f = 0.8 # sec, facilitation recovery 
+    U = 0.1 # synaptic release probability 
+    
+    # amplitude of ramping at the end of delay
+    RAMP_AMP = 4
+
+    if RAMP_TYPE == '2s':
+        STIM_SIGMA = 0.05 # SD of selective cue intensity
+        STIM_AMP = 0.6   # mean of selective cue intensity    
+        # Step-like ramp
+        T_RAMP_END = T_RAMP_START + T_DUR_DELAY + T_DUR_STIM
+        # amplitude of PV perturbation
+        PV_VEC = [0,0.5,1,3.2]
+    
+    elif RAMP_TYPE == 'step':
+        STIM_SIGMA = 0.01 # SD of selective cue intensity
+        STIM_AMP = 1   # mean of selective cue intensity    
+        # Step-like ramp
+        T_RAMP_END = T_RAMP_START + 10/DT
+        # amplitude of PV perturbation
+        PV_VEC = [0,1.5,2.5,3.8,6.8]
+
+    else:
+        print('ERROR: no valid paratemer for ramping has been selected')
+       
+elif NETWORK_STR == 'two_hemi_internal':
+    # TODO find appropriate figure of the original paper
+    STIM_SIGMA = 0.01 # SD of selective cue intensity
+    STIM_AMP = 0.4   # mean of selective cue intensity
+        
+    # amplitude of fast noise
+    SIGMA_NOISE = 9
+
+    # change presample epoch duration
+    # already stated above but if you want to change the condition, do here.
+    BSLN_T = 1500/DT 
+
+    T_DUR_STIM = 1000/DT
+    T_DUR_PV = 600/DT
+    T_DUR_DELAY = 2000/DT
+
+    # sample epoch start and end (coincies with start of delay epoch)
+    # also, already stated above
+    T_STIM_START = BSLN_T + 1
+    T_STIM_END = T_STIM_START + T_DUR_STIM - 1
+
+    # Photostimulation
+    T_PV_START = T_STIM_END + 1
+    T_PV_END = T_PV_START + T_DUR_PV - 1
+
+    # End of Delay epoch
+    T_DELAY_END = T_STIM_END + T_DUR_DELAY
+    T_RAMP_START = T_STIM_START
+
+    # synaptic weights(changed according to supple tables)
+    W_LL = 9.75
+    W_RR = W_LL
+    W_LI = 2.5 # pre:Inh post:Exc
+    W_IL = 4 # pre:Exc post:Inh
+    W_RI = W_LI
+    W_IR = W_IL
+    W_LR = 2.5 # between left-right Exc
+    W_RL = W_LR
+    W_II = 1
+        
+    # input currents
+    I_L = 2.3 # or 2
+    I_R = I_L
+    I_I = 1
+    I_I_BSL = I_I # 뭔지 모르겠음.
+    
+    # cross-hemisphere excitation
+    W_HEMI = 0.4
+        
+    # static nonlinearity parameters
+    TAU_D = 0.12 # sec, depression recovery 
+    TAU_f = 0.1 # sec, facilitation recovery 
+    U = 0.1 # synaptic release probability 
+    
+    ALPHA = 2.5
+
+    # Step-like ramp
+    T_RAMP_END = T_RAMP_START + 10/DT
+        
+    # amplitude of ramping at the end of delay
+    RAMP_AMP = 3.15
+        
+    # amplitude of PV perturbation
+    PV_VEC = [0,1.3,2.3,7]
+
+else:
+    print('ERROR: no valid network structure has been selected')
 
  
 print(PV_VEC)
