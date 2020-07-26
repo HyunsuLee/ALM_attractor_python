@@ -7,41 +7,41 @@ import numpy as np
 
 # Network parameters
 
-N_trials = 1000
+N_TRIALS = 1000
 
 # Membrane time constant
-tau_c = 100 # 정확히 뭔지 알아낼 것.
-tau_n = 100 # 마찬가지
+TAU_C = 100 # 정확히 뭔지 알아낼 것.
+TAU_N = 100 # 마찬가지
 
-dt = 1 # 1ms
+DT = 1 # 1ms
 
-t_end = 6000
-t_vec = np.arange(0, t_end, dt)
+T_END = 6000
+T_VEC = np.arange(0, T_END, DT)
 
-taus = np.transpose([tau_c, tau_n, tau_n, tau_c])
+TAU_S = np.transpose([TAU_C, TAU_N, TAU_N, TAU_C])
 
-bsln_t = 1500/dt # 무슨 의미? sample period 중 auditory cue 주기 전 기간인듯.
+BSLN_T = 1500/DT # 무슨 의미? sample period 중 auditory cue 주기 전 기간인듯.
 
-t_dur_stim = 1000/dt
-t_dur_PV = 600/dt # pertubation인가?
-t_dur_delay = 2000/dt
+T_DUR_STIM = 1000/DT
+T_DUR_PV = 600/DT # pertubation인가?
+T_DUR_DELAY = 2000/DT
 
 # sample epoch start and end (coincides with start of delay epoch)
-t_stim_start = bsln_t + 1 # dt얼마이든 1dt만큼 더 가서 한다는 의미?
-t_stim_end = t_stim_start + t_dur_stim -1 
+T_STIM_START = BSLN_T + 1 # DT얼마이든 1DT만큼 더 가서 한다는 의미?
+T_STIM_END = T_STIM_START + T_DUR_STIM -1 
 
 # Photostimulation
-t_PV_start = t_stim_end + 1
-t_PV_end = t_PV_start + t_dur_PV - 1
+T_PV_START = T_STIM_END + 1
+T_PV_END = T_PV_START + T_DUR_PV - 1
 
 # End of Delay epoch
-t_delay_end = t_stim_end + t_dur_delay
+T_DELAY_END = T_STIM_END + T_DUR_DELAY
 
-t_ramp_start = t_stim_start
+T_RAMP_START = T_STIM_START
 
-# Value of alpha in the transduction function
-# f(x) = alpha * log(1+exp(x/alpha))
-alpha = 4.5
+# Value of ALPHA in the transduction function
+# f(x) = ALPHA * log(1+exp(x/ALPHA))
+ALPHA = 4.5
 
 # network connectivity and parameters
 # 1) 'one_hemi_multi_fp_step'
@@ -49,16 +49,16 @@ alpha = 4.5
 # 3) 'two_hemi_ramp' - ramp_type '2s' or 'step' must be selected
 # 4) 'two_hemi_internal'
 
-network_str = 'one_hemi_multi_fp_step'
+NETWORK_STR = 'one_hemi_multi_fp_step'
 # ramp_type = '2s' ## for 'two_hemi_ramp' network architecture
 
-if network_str == 'one_hemi_multi_fp_step':
+if NETWORK_STR == 'one_hemi_multi_fp_step':
     # one hemi Fig1b right, EDF1p-v
-    stim_sigma = 0.1 # SD of selective cue intensity
-    stim_amp = 0.8   # mean of selective cue intensity
+    STIM_SIGMA = 0.1 # SD of selective cue intensity
+    STIM_AMP = 0.8   # mean of selective cue intensity
         
     # amplitude of fast noise
-    sigma_noise = 9
+    SIGMA_NOISE = 9
         
     # synaptic weights(changed according to supple tables)
     W_LL = 5.8
@@ -72,27 +72,28 @@ if network_str == 'one_hemi_multi_fp_step':
     W_II = 2
         
     # input currents
-    i_L = 2.27
-    i_R = i_L
-    i_I = 1
-    iI_bsl = i_I # 뭔지 모르겠음.
+    I_L = 2.27
+    I_R = I_L
+    I_I = 1
+    I_I_BSL = I_I # 뭔지 모르겠음.
     
     # cross-hemisphere excitation
-    JH = 0.0
+    W_HEMI = 0.0
         
     # static nonlinearity parameters
-    tau_D = 0.14 # sec, depression recovery 
-    tau_f = 0.8 # sec, facilitation recovery 
+    TAU_D = 0.14 # sec, depression recovery 
+    TAU_f = 0.8 # sec, facilitation recovery 
     U = 0.05 # synaptic release probability 
     
     # Step-like ramp
-    t_ramp_end = t_ramp_start + 10/dt
+    T_RAMP_END = T_RAMP_START + 10/DT
         
     # amplitude of ramping at the end of delay
-    ramp_amp = 2
+    RAMP_AMP = 2
         
     # amplitude of PV perturbation
-    PV_vec = [0,1,2,6]
+    PV_VEC = [0,1,2,6]
 
 
  
+print(PV_VEC)
