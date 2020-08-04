@@ -4,6 +4,7 @@
 # load library
 # preserve for scipy or numpy, activate gym environemt
 import numpy as np
+import util_functions as uf
 
 # Network parameters
 
@@ -260,13 +261,17 @@ PV_TYPE = 'bilateral'
 
 # Stimulus smooth
 SIM_LEN = int(T_END/DT)
-FS = 1000/DT
-TAU_EXT = 20
+TAU_EXT = 20 # ms
 
 STIM_T = np.zeros((SIM_LEN, 1))
 SMOOTHED_START = int(T_STIM_START + TAU_EXT/DT)
 SMOOTHED_END = int(T_STIM_END - TAU_EXT/DT)
 SMOOTHED_DUR = int(SMOOTHED_END-SMOOTHED_START) 
 STIM_T[SMOOTHED_START:SMOOTHED_END] = np.ones((SMOOTHED_DUR,1))
+
+STIM_SMOOTHED = uf.exp_smooth(STIM_T, DT, TAU_EXT)
+
+print(STIM_SMOOTHED[SMOOTHED_START + TAU_EXT -1,0])
+
 
 
