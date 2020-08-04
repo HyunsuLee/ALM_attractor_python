@@ -52,7 +52,7 @@ NETWORK_STR = 'one_hemi_multi_fp_step'
 # RAMP_TYPE = '2s' ## for 'two_hemi_ramp' network architecture
 
 if NETWORK_STR == 'one_hemi_multi_fp_step':
-    # one hemi Fig1b right, EDF1p-v
+    # one hemi Fig1b right, EDF1p-v, supple table #1
     STIM_SIGMA = 0.1 # SD of selective cue intensity
     STIM_AMP = 0.8   # mean of selective cue intensity
         
@@ -81,7 +81,7 @@ if NETWORK_STR == 'one_hemi_multi_fp_step':
         
     # static nonlinearity parameters
     TAU_D = 0.14 # sec, depression recovery 
-    TAU_f = 0.8 # sec, facilitation recovery 
+    TAU_F = 0.8 # sec, facilitation recovery 
     U = 0.05 # synaptic release probability 
     
     # Step-like ramp
@@ -94,7 +94,7 @@ if NETWORK_STR == 'one_hemi_multi_fp_step':
     PV_VEC = [0,1,2,6]
 
 elif NETWORK_STR == 'one_hemi_single_fp':
-    # one hemi Fig1b right, EDF1p-v
+    # one hemi Fig1b middel, EDF1i-o, supple table #2
     STIM_SIGMA = 0.05 # SD of selective cue intensity
     STIM_AMP = 0.5   # mean of selective cue intensity
         
@@ -123,7 +123,7 @@ elif NETWORK_STR == 'one_hemi_single_fp':
         
     # static nonlinearity parameters
     TAU_D = 0.0 # sec, depression recovery 
-    TAU_f = 0.05 # sec, facilitation recovery 
+    TAU_F = 0.05 # sec, facilitation recovery 
     U = 0.05 # synaptic release probability 
     
     # Step-like ramp
@@ -136,7 +136,7 @@ elif NETWORK_STR == 'one_hemi_single_fp':
     PV_VEC = [0,0.4,2,12]
 
 elif NETWORK_STR == 'two_hemi_ramp':
-    # TODO find appropriate figure of the original paper
+    # EDF9b-h - supple table#4(ramp 2s), EDF9p-q - supple table#5(ramp step)
     # amplitude of fast noise
     SIGMA_NOISE = 8
         
@@ -162,7 +162,7 @@ elif NETWORK_STR == 'two_hemi_ramp':
         
     # static nonlinearity parameters
     TAU_D = 0.1 # sec, depression recovery 
-    TAU_f = 0.8 # sec, facilitation recovery 
+    TAU_F = 0.8 # sec, facilitation recovery 
     U = 0.1 # synaptic release probability 
     
     # amplitude of ramping at the end of delay
@@ -188,7 +188,7 @@ elif NETWORK_STR == 'two_hemi_ramp':
         print('ERROR: no valid paratemer for ramping has been selected')
        
 elif NETWORK_STR == 'two_hemi_internal':
-    # TODO find appropriate figure of the original paper
+    # EDF9i-o, supple table #6
     STIM_SIGMA = 0.01 # SD of selective cue intensity
     STIM_AMP = 0.4   # mean of selective cue intensity
         
@@ -238,7 +238,7 @@ elif NETWORK_STR == 'two_hemi_internal':
         
     # static nonlinearity parameters
     TAU_D = 0.12 # sec, depression recovery 
-    TAU_f = 0.1 # sec, facilitation recovery 
+    TAU_F = 0.1 # sec, facilitation recovery 
     U = 0.1 # synaptic release probability 
     
     ALPHA = 2.5
@@ -255,5 +255,18 @@ elif NETWORK_STR == 'two_hemi_internal':
 else:
     print('ERROR: no valid network structure has been selected')
 
- 
-print(PV_VEC)
+# Perturbation type
+PV_TYPE = 'bilateral'
+
+# Stimulus smooth
+SIM_LEN = int(T_END/DT)
+FS = 1000/DT
+TAU_EXT = 20
+
+STIM_T = np.zeros((SIM_LEN, 1))
+SMOOTHED_START = int(T_STIM_START + TAU_EXT/DT)
+SMOOTHED_END = int(T_STIM_END - TAU_EXT/DT)
+SMOOTHED_DUR = int(SMOOTHED_END-SMOOTHED_START) 
+STIM_T[SMOOTHED_START:SMOOTHED_END] = np.ones((SMOOTHED_DUR,1))
+
+
