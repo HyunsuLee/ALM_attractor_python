@@ -289,8 +289,6 @@ for t_idx in range(int(T_RAMP_START-1), int(T_RAMP_END)):
 RAMP_VEC[int(T_RAMP_END):, :]= RAMP_VEC[int(T_RAMP_END-1),:]
 
 # Dynamics
-
-
-
-
-
+PV_idx = 0
+h_mat = np.zeros((len(PV_VEC), N_TRIALS, len(T_VEC),4))
+r_mat = np.zeros((len(PV_VEC), N_TRIALS, len(T_VEC),4))
