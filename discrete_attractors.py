@@ -8,7 +8,7 @@ import util_functions as uf
 
 # Network parameters
 
-N_TRIALS = 1000
+N_TRIALS = 10
 
 # Membrane time constant
 TAU_C = 100 # 정확히 뭔지 알아낼 것.
@@ -292,3 +292,74 @@ RAMP_VEC[int(T_RAMP_END):, :]= RAMP_VEC[int(T_RAMP_END-1),:]
 PV_idx = 0
 h_mat = np.zeros((len(PV_VEC), N_TRIALS, len(T_VEC),4))
 r_mat = np.zeros((len(PV_VEC), N_TRIALS, len(T_VEC),4))
+
+for PV_intensity in PV_VEC:
+    
+    # Scaling weigths
+    Scaled_W_LL = W_LL - (W_IL*W_LI)/(1+W_II)
+    Scaled_W_RR = W_RR - (W_IR*W_RI)/(1+W_II)
+    Scaled_W_LR = W_LR - (W_LI*W_IR)/(1+W_II)
+    Scaled_W_RL = W_RL - (W_RI*W_IL)/(1+W_II)
+
+    # Scaling input currents
+    Scaled_I_L = I_L - (W_LI*I_I)/(1+W_II)
+    Scaled_I_R = I_R - (W_RI*I_I)/(1+W_II)
+
+    # Synaptic Matrix
+    P_MATRIX = np.array([[Scaled_W_LL, Scaled_W_LR, 0, 0], \
+                        [Scaled_W_RL, Scaled_W_RR, 0, 0], \
+                        [0, 0, Scaled_W_RR, Scaled_W_RL], \
+                        [0, 0, Scaled_W_LR, Scaled_W_LL]])
+
+    INPUT_MAT = np.zeros((4, int(T_END/DT), N_TRIALS))
+
+    # Noise
+    NOISE_INPUT = np.zeros((4, int(T_END/DT), N_TRIALS))
+    for trial in range(0, N_TRIALS):
+        stim_amp_distr = STIM_AMP + STIM_SIGMA*np.random.randn()
+        
+        ramp_in = RAMP_VEC
+
+        if trial < N_TRIALS/2:
+            # for contralateral trial
+            stim_in = stim_amp_distr * np.array([1,0,1,0]) * STIM_SMOOTHED
+            if NETWORK_STR == 'one_hemi_single_fp':
+                ramp_in[:,1] = 0
+        else:
+            # for ipsilateral trial
+            stim_in = stim_amp_distr * np.array([0,1,0,1]) * STIM_SMOOTHED
+            if NETWORK_STR == 'one_hemi_single_fp':
+                ramp_in[:,0] = 0
+        
+        PV_I_I = I_I + PV_intensity * I_I * PV_SMOOTHED
+        
+        # Scaling weights
+        I_L_PV = I_L - (W_LI * PV_I_I)/(1+W_II)
+        I_R_PV = I_R - (W_RI * PV_I_I)/(1+W_II)
+
+        if PV_TYPE == 'bilateral':
+            PV_in = np.array([I_L_PV, I_R_PV, I_R_PV, I_L_PV])
+        elif PV_TYPE == 'ipsilateral':
+            PV_in = np.array([I_L_PV, I_R_PV, Scaled_I_R * np.ones((SIM_LEN, 1)),\
+                 Scaled_I_L * np.ones((SIM_LEN, 1))])
+        elif PV_TYPE == 'contralateral':
+            PV_in = np.array([Scaled_I_L * np.ones((SIM_LEN, 1)), Scaled_I_R * np.ones((SIM_LEN, 1)),\
+                 I_R_PV, I_L_PV])
+        
+        # Dynamics
+        y = np.zeros((SIM_LEN, 4))
+        h = np.zeros((SIM_LEN, 4))
+        r = np.zeros((SIM_LEN, 4))
+        h[0,:] = np.array([1,1,1,1])
+        
+        for t_idx in range(int(T_END/DT)):
+            # TODO
+            pass
+
+
+        
+
+    
+    
+    PV_idx += 1
+    
