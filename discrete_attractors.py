@@ -1,5 +1,6 @@
 # discrete_attractors.py implements code for generate Inagaki et al. 2019
 # original author provided MATLAB code at github repository.
+# https://github.com/fontolanl/ALM_attractors/blob/master/ALM_attractors_code/discrete_attractors.m
 
 # load library
 # preserve for scipy or numpy, activate gym environemt
@@ -8,7 +9,7 @@ import util_functions as uf
 
 # Network parameters
 
-N_TRIALS = 10
+N_TRIALS = 4
 
 # Membrane time constant
 TAU_C = 100 # 정확히 뭔지 알아낼 것.
@@ -369,4 +370,6 @@ for PV_intensity in PV_VEC:
 
     PV_idx += 1
 
-print(np.shape(h_mat)) # h_mat, 0:perturbation, 1:trial number, 2:time step, 3: results
+[correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pf_c] = \
+    uf.ALM_attractor_figs(r_mat, PV_VEC, T_VEC, DT, T_STIM_START, T_STIM_END, T_DELAY_END, N_TRIALS)
+
