@@ -56,11 +56,47 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
     # smoothing window
     win_ms = 100
 
-    r_CD = 0 # TODO
-    print(correct_trials_left[0])
+    CD_rt_1st = smooth(np.squeeze(np.mean(np.squeeze(r_mat[0, correct_trials_right[0], :, 0]), axis = 0)), np.round(win_ms/dt))
+    CD_lt_1st = smooth(np.squeeze(np.mean(np.squeeze(r_mat[0, correct_trials_left[0], :, 0]), axis = 0)), np.round(win_ms/dt))
+    CD_rt_2nd = smooth(np.squeeze(np.mean(np.squeeze(r_mat[0, correct_trials_right[0], :, 1]), axis = 0)), np.round(win_ms/dt))
+    CD_lt_2nd = smooth(np.squeeze(np.mean(np.squeeze(r_mat[0, correct_trials_left[0], :, 1]), axis = 0)), np.round(win_ms/dt))
+    r_CD = np.array([CD_rt_1st - CD_lt_1st, CD_rt_2nd - CD_lt_2nd])
+
+    CD_delay = np.mean(r_CD[:, int((t_delay_end-400)/dt):int(t_delay_end)], axis = 1)
+
+    ## Compute endpoints and projected trajectories
+    r_right_c = []
+    r_left_c = []
+    r_right_pj_c = []
+    r_left_pj_c = []
+
+    r_right_c.append(np.stack((np.squeeze(r_mat[0, correct_trials_right[0], :, 0]),\
+        np.squeeze(r_mat[0, correct_trials_right[0], :, 1])), axis=2))
+    r_left_c.append(np.stack((np.squeeze(r_mat[0, correct_trials_left[0], :, 0]), \
+        np.squeeze(r_mat[0, correct_trials_left[0], :, 1])), axis=2))
     
-    correct_trials_right = 0
-    correct_trials_left = 0
-    r_right_pj_c = 0
-    r_left_pj_c = 0
+    r_right_pj_c.append(np.zeros((len(correct_trials_right[0]), len(t_vec))))
+    r_left_pj_c.append(np.zeros((len(correct_trials_left[0]), len(t_vec))))
+
+    endpoints_right = np.zeros((len(correct_trials_right[0]), 1))
+    endpoints_left = np.zeros((len(correct_trials_left[0]), 1))
+    # TODO
+    
+
     return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
+
+
+def smooth(a,WSZ):
+    # a: NumPy 1-D array containing the data to be smoothed
+    # WSZ: smoothing window size needs, which must be odd number,
+    # as in the original MATLAB implementation
+    # source: https://stackoverflow.com/questions/40443020/matlabs-smooth-implementation-n-point-moving-average-in-numpy-python
+    if WSZ%2 == 0:
+        WSZ = int(WSZ) - 1
+    else:
+        WSZ = int(WSZ)
+    out0 = np.convolve(a,np.ones(WSZ,dtype=int),'valid')/WSZ    
+    r = np.arange(1,WSZ-1,2)
+    start = np.cumsum(a[:WSZ-1])[::2]/r
+    stop = (np.cumsum(a[:-WSZ:-1])[::2]/r)[::-1]
+    return np.concatenate((  start , out0, stop  ))

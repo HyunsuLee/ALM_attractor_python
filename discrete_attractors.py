@@ -9,7 +9,7 @@ import util_functions as uf
 
 # Network parameters
 
-N_TRIALS = 4
+N_TRIALS = 10
 
 # Membrane time constant
 TAU_C = 100 # 정확히 뭔지 알아낼 것.
