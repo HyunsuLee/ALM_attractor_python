@@ -80,8 +80,45 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
 
     endpoints_right = np.zeros((len(correct_trials_right[0]), 1))
     endpoints_left = np.zeros((len(correct_trials_left[0]), 1))
-    # TODO
     
+    delay_endpoint_start = int((t_delay_end-400)/dt)
+    delay_endpoint_end = int(t_delay_end)
+
+    for idx in range(len(endpoints_right)):
+        endpoints_right[idx] = np.mean(np.matmul(r_right_c[0][idx][delay_endpoint_start:delay_endpoint_end][:], \
+            CD_delay))
+        r_right_pj_c[0][idx][:] = np.matmul(r_right_c[0][idx][:][:], CD_delay)
+
+    for idx in range(len(endpoints_left)):
+        endpoints_left[idx] = np.mean(np.matmul(r_left_c[0][idx][delay_endpoint_start:delay_endpoint_end][:], \
+            CD_delay))
+        r_left_pj_c[0][idx][:] = np.matmul(r_left_c[0][idx][:][:], CD_delay)      
+        
+    # Median of endpoints
+    right_norm = np.median(endpoints_right)
+    left_norm = np.median(endpoints_left)
+    
+    # Normalization
+    r_right_pj_c[0] = (r_right_pj_c[0] - left_norm)/(right_norm - left_norm)
+    r_left_pj_c[0] = (r_left_pj_c[0] - left_norm)/(right_norm - left_norm)
+
+    # Smooth the vectors
+    r_smooth_right_pj = []
+    r_smooth_left_pj = []
+    r_smooth_right_pj_std = []
+    r_smooth_left_pj_std = []
+
+    r_smooth_right_pj.append(smooth(np.mean(r_right_pj_c[0], axis = 0), np.round(win_ms/dt)))
+    r_smooth_left_pj.append(smooth(np.mean(r_left_pj_c[0], axis = 0), np.round(win_ms/dt)))
+
+    r_smooth_right_pj_std.append(smooth(np.std(r_right_pj_c[0], axis = 0), np.round(win_ms/dt)))
+    r_smooth_left_pj_std.append(smooth(np.std(r_left_pj_c[0], axis = 0), np.round(win_ms/dt)))
+# TODO
+
+    
+
+    
+
 
     return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
 
