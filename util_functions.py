@@ -113,7 +113,41 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
 
     r_smooth_right_pj_std.append(smooth(np.std(r_right_pj_c[0], axis = 0), np.round(win_ms/dt)))
     r_smooth_left_pj_std.append(smooth(np.std(r_left_pj_c[0], axis = 0), np.round(win_ms/dt)))
-# TODO
+
+    Data_at_each_bin = []
+    Data_at_each_bin.append(np.zeros((2,2)))
+
+    Data_at_each_bin[0][0,0] = r_smooth_right_pj[0][bin_3]
+    Data_at_each_bin[0][0,1] = r_smooth_right_pj[0][bin_4]
+    Data_at_each_bin[0][1,0] = r_smooth_left_pj[0][bin_3]
+    Data_at_each_bin[0][1,1] = r_smooth_left_pj[0][bin_4]
+
+    mean_proj = []
+    mean_proj.append(r_smooth_right_pj[0])
+    mean_proj.append(r_smooth_left_pj[0])
+    
+    # generate the unperturbed correct trials fig
+    fig1, ax1 = plt.subplots()
+
+    ax1.set_xlabel('Time to movement onset (s)')
+    ax1.set_ylabel('Proj. to CD')
+    ax1.set_title('Unperturbed correct trials')
+    ax1.plot(t_vec_plt, r_smooth_right_pj[0], color = 'tab:blue')
+    ax1.fill_between(t_vec_plt, r_smooth_right_pj[0] - r_smooth_right_pj_std[0], \
+        r_smooth_right_pj[0] + r_smooth_right_pj_std[0], alpha =0.2)
+    ax1.plot(t_vec_plt, r_smooth_left_pj[0], color = 'tab:red')
+    ax1.fill_between(t_vec_plt, r_smooth_left_pj[0] - r_smooth_left_pj_std[0], \
+        r_smooth_left_pj[0] + r_smooth_left_pj_std[0], alpha =0.2)
+
+    ax1.axvline((t_stim_start - t_delay_end)*dt/1000, color = "black", linestyle = "--")
+    ax1.axvline((t_stim_end - t_delay_end)*dt/1000, color = "black", linestyle = "--")
+    ax1.axvline(0, color = "black", linestyle = "--")
+    
+    fig1.tight_layout()
+
+    plt.savefig('./figures/unperturbed_correct_trial.png')
+    plt.close()
+
 
     
 
