@@ -228,8 +228,37 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
     fig3.tight_layout()
     plt.savefig('./figures/perturbed_correct.png')
     plt.close()
+    
+    r_right_pj_c_mat = np.concatenate(r_right_pj_c[1:], axis = 0)
+    r_left_pj_c_mat = np.concatenate(r_left_pj_c[1:], axis = 0)
 
-    # TODO
+    hist_pv_rt, bin_pv_rt = np.histogram(r_right_pj_c_mat[:, int(t_delay_end)], bins = \
+        np.arange(-1.5, 2.5, 0.1) + 0.05)
+    hist_pv_rt_center = bin_pv_rt[0:-1] + (bin_pv_rt[1] - bin_pv_rt[0])/2
+    hist_pv_rt_width = (bin_pv_rt[1] - bin_pv_rt[0])*0.8
+    
+    hist_pv_lt, bin_pv_lt = np.histogram(r_left_pj_c_mat[:, int(t_delay_end)], bins = \
+        np.arange(-1.5, 2.5, 0.1) + 0.05)
+    hist_pv_lt_center = bin_pv_lt[0:-1] + (bin_pv_lt[1] - bin_pv_lt[0])/2
+    hist_pv_lt_width = (bin_pv_lt[1] - bin_pv_lt[0])*0.8
+
+    fig4, ax4 = plt.subplots()
+    
+    ax4.bar(hist_pv_rt_center, hist_pv_rt/np.shape(r_right_pj_c_mat)[0], align= 'center', \
+        width = hist_pv_rt_width, color = 'tab:blue', label = 'right')
+    ax4.bar(hist_pv_lt_center, hist_pv_lt/np.shape(r_left_pj_c_mat)[0], align = 'center', \
+        width = hist_pv_lt_width, color = 'tab:red', label = 'left')
+    
+    ax4.set_xlabel('Fraction of correct trials')
+    ax4.set_ylabel('Proj. to CD')
+    ax4.set_title('Endpoint distribution - pertubed correct trials')
+    ax4.legend()
+    fig4.tight_layout()
+
+    plt.savefig('./figures/perturbed_correct_trial_hist.png')
+    plt.close()
+
+
     return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
 
 
