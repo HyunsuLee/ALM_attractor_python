@@ -70,11 +70,9 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
     r_right_pj_c = []
     r_left_pj_c = []
 
-    r_right_c.append(np.stack((np.squeeze(r_mat[0, correct_trials_right[0], :, 0]),\
-        np.squeeze(r_mat[0, correct_trials_right[0], :, 1])), axis=2))
-    r_left_c.append(np.stack((np.squeeze(r_mat[0, correct_trials_left[0], :, 0]), \
-        np.squeeze(r_mat[0, correct_trials_left[0], :, 1])), axis=2))
-    
+    r_right_c.append(np.squeeze(r_mat[0, correct_trials_right[0], :, 0:2]))
+    r_left_c.append(np.squeeze(r_mat[0, correct_trials_left[0], :, 0:2]))
+
     r_right_pj_c.append(np.zeros((len(correct_trials_right[0]), len(t_vec))))
     r_left_pj_c.append(np.zeros((len(correct_trials_left[0]), len(t_vec))))
 
@@ -147,13 +145,91 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
 
     plt.savefig('./figures/unperturbed_correct_trial.png')
     plt.close()
-
-
     
+    ## Distribution of end points - unperturbed correct trials fig
 
+    hist_rt, bin_rt = np.histogram(r_right_pj_c[0][:, int(t_delay_end)], bins = \
+        np.arange(-1.5, 2.5, 0.1) + 0.05)
+    hist_rt_center = bin_rt[0:-1] + (bin_rt[1] -bin_rt[0])/2
+    hist_rt_width = (bin_rt[1] - bin_rt[0])*0.8
     
+    hist_lt, bin_lt = np.histogram(r_left_pj_c[0][:, int(t_delay_end)], bins = \
+        np.arange(-1.5, 2.5, 0.1) + 0.05)
+    hist_lt_center = bin_lt[0:-1] + (bin_lt[1] - bin_lt[0])/2
+    hist_lt_width = (bin_lt[1] - bin_lt[0])*0.8
 
+    fig2, ax2 = plt.subplots()
+    
+    ax2.bar(hist_rt_center, hist_rt/N_right_trials, align= 'center',width = hist_rt_width, \
+        color = 'tab:blue', label = 'right')
+    ax2.bar(hist_lt_center, hist_lt/N_left_trials, align = 'center', width = hist_lt_width, \
+        color = 'tab:red', label = 'left')
+    
+    ax2.set_xlabel('Fraction of correct trials (unperturbed)')
+    ax2.set_ylabel('Proj. to CD')
+    ax2.set_title('Endpoint distribution - unpertubed correct trials')
+    ax2.legend()
+    fig2.tight_layout()
 
+    plt.savefig('./figures/unperturbed_correct_trial_hist.png')
+    plt.close()
+    
+    # Projected Activity - Perturbed correct trials
+
+    fig3, ax3 = plt.subplots()
+
+    for pv_idx in range(1, len(pv_vec)):
+        correct_trials_right.append(np.nonzero(r_mat[pv_idx, right_trials, int(t_delay_end), 0] > \
+             r_mat[pv_idx, right_trials, int(t_delay_end), 1])[0])
+        correct_trials_left.append(int(n_trials/2) + np.nonzero(r_mat[pv_idx, left_trials, int(t_delay_end), 0] < \
+             r_mat[pv_idx, left_trials, int(t_delay_end), 1])[0])
+        
+        r_right_c.append(np.squeeze(r_mat[pv_idx, correct_trials_right[pv_idx], :, 0:2]))
+        r_left_c.append(np.squeeze(r_mat[pv_idx, correct_trials_left[pv_idx], :, 0:2]))
+
+        r_right_pj_c.append(np.zeros((len(correct_trials_right[pv_idx]), len(t_vec))))
+        r_left_pj_c.append(np.zeros((len(correct_trials_left[pv_idx]), len(t_vec))))
+
+        for idx in range(len(correct_trials_right[pv_idx])):
+            r_right_pj_c[pv_idx][idx, :] = (np.matmul(r_right_c[pv_idx][idx][:][:], CD_delay) - left_norm) / \
+                (right_norm - left_norm)
+
+        for idx in range(len(correct_trials_left[pv_idx])):
+            r_left_pj_c[pv_idx][idx, :] = (np.matmul(r_left_c[pv_idx][idx][:][:], CD_delay) - left_norm) / \
+                (right_norm - left_norm)
+        
+        r_smooth_right_pj.append(smooth(np.mean(r_right_pj_c[pv_idx], axis = 0), np.round(win_ms/dt)))
+        r_smooth_left_pj.append(smooth(np.mean(r_left_pj_c[pv_idx], axis = 0), np.round(win_ms/dt)))
+
+        ax3.plot(t_vec_plt, r_smooth_right_pj[pv_idx], \
+            color = (0.1, 0.3, (6 - pv_idx)/(len(pv_vec) + 3), (8 - pv_idx)/(len(pv_vec) + 4)))
+        ax3.plot(t_vec_plt, r_smooth_left_pj[pv_idx], \
+            color = ((6 - pv_idx)/(len(pv_vec) + 3), 0.1, 0.4, (8 - pv_idx)/(len(pv_vec) + 4)))
+        
+        Data_at_each_bin.append(np.zeros((2,2)))
+        Data_at_each_bin[pv_idx][0,0] = r_smooth_right_pj[pv_idx][bin_3]
+        Data_at_each_bin[pv_idx][0,1] = r_smooth_right_pj[pv_idx][bin_4]
+        Data_at_each_bin[pv_idx][1,0] = r_smooth_left_pj[pv_idx][bin_3]
+        Data_at_each_bin[pv_idx][1,1] = r_smooth_left_pj[pv_idx][bin_4]
+
+        mean_proj.append(r_smooth_right_pj[pv_idx])
+        mean_proj.append(r_smooth_left_pj[pv_idx])
+    
+    ax3.plot(t_vec_plt, r_smooth_right_pj[0], color = 'tab:blue', linestyle = '--')
+    ax3.plot(t_vec_plt, r_smooth_left_pj[0], color = 'tab:red', linestyle = '--')
+
+    ax3.axvline((t_stim_start - t_delay_end)*dt/1000, color = "black", linestyle = "--")
+    ax3.axvline((t_stim_end - t_delay_end)*dt/1000, color = "black", linestyle = "--")
+    ax3.axvline(0, color = "black", linestyle = "--")
+
+    ax3.set_xlabel('Proj. to CD')
+    ax3.set_ylabel('Time to movement onset (s)')
+    ax3.set_title('Perturbed correct trials')
+    fig3.tight_layout()
+    plt.savefig('./figures/perturbed_correct.png')
+    plt.close()
+
+    # TODO
     return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
 
 
