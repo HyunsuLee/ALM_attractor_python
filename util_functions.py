@@ -222,8 +222,8 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
     ax3.axvline((t_stim_end - t_delay_end)*dt/1000, color = "black", linestyle = "--")
     ax3.axvline(0, color = "black", linestyle = "--")
 
-    ax3.set_xlabel('Proj. to CD')
-    ax3.set_ylabel('Time to movement onset (s)')
+    ax3.set_ylabel('Proj. to CD')
+    ax3.set_xlabel('Time to movement onset (s)')
     ax3.set_title('Perturbed correct trials')
     fig3.tight_layout()
     plt.savefig('./figures/perturbed_correct.png')
@@ -258,8 +258,150 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
     plt.savefig('./figures/perturbed_correct_trial_hist.png')
     plt.close()
 
+    # Projected Activity - Perturbed error trials
+
+    fig5, ax5 = plt.subplots()
+
+    error_trials_right = [0] # to pass zero perturbation intensity in error trials 
+    error_trials_left = [0]
+    
+    r_right_e = [0]
+    r_left_e = [0]
+
+    r_right_pj_e = [0]
+    r_left_pj_e = [0]
+
+    r_right_pj_e_avg = [0]
+    r_left_pj_e_avg = [0]
+
+    mean_cor_proj = []
+
+    for pv_idx in range(1, len(pv_vec)):
+        error_trials_right.append(np.nonzero(r_mat[pv_idx, right_trials, int(t_delay_end), 0] < \
+             r_mat[pv_idx, right_trials, int(t_delay_end), 1])[0])
+        error_trials_left.append(int(n_trials/2) + np.nonzero(r_mat[pv_idx, left_trials, int(t_delay_end), 0] > \
+             r_mat[pv_idx, left_trials, int(t_delay_end), 1])[0])
+
+        r_right_e.append(np.squeeze(r_mat[pv_idx, error_trials_right[pv_idx], :, 0:2])) 
+        r_left_e.append(np.squeeze(r_mat[pv_idx, error_trials_left[pv_idx], :, 0:2]))
+
+        r_right_pj_e.append(np.zeros((len(error_trials_right[pv_idx]), len(t_vec)))) 
+        r_left_pj_e.append(np.zeros((len(error_trials_left[pv_idx]), len(t_vec))))
+
+        r_right_pj_e_avg.append(np.zeros((len(t_vec), 1)))
+        r_left_pj_e_avg.append(np.zeros((len(t_vec), 1)))
+
+        for idx in range(len(error_trials_right[pv_idx])):
+            r_right_pj_e[pv_idx][idx, :] = (np.matmul(r_right_e[pv_idx][idx][:][:], CD_delay) - left_norm) / \
+                (right_norm - left_norm)
+
+        for idx in range(len(error_trials_left[pv_idx])):
+            r_left_pj_e[pv_idx][idx, :] = (np.matmul(r_left_e[pv_idx][idx][:][:], CD_delay) - left_norm) / \
+                (right_norm - left_norm)
+
+        if len(error_trials_right[pv_idx]) > 1:
+            r_right_pj_e_avg.append(smooth(np.mean(r_right_pj_e[pv_idx], axis = 0), np.round(win_ms/dt)))
+            ax5.plot(t_vec_plt, r_right_pj_e_avg[pv_idx], \
+                color = (0.1, 0.3, (6 - pv_idx)/(len(pv_vec) + 3), (8 - pv_idx)/(len(pv_vec) + 4)))
+        elif len(error_trials_right[pv_idx]) == 1:
+            r_right_pj_e_avg.append(smooth(np.squeeze(r_right_pj_e[pv_idx], axis=0), np.round(win_ms/dt)))
+        
+        if len(error_trials_left[pv_idx]) > 1:
+            r_left_pj_e_avg.append(smooth(np.mean(r_left_pj_e[pv_idx], axis = 0), np.round(win_ms/dt)))
+            ax5.plot(t_vec_plt, r_left_pj_e_avg[pv_idx], \
+                color = ((6 - pv_idx)/(len(pv_vec) + 3), 0.1, 0.4, (8 - pv_idx)/(len(pv_vec) + 4)))
+        elif len(error_trials_left[pv_idx]) == 1:
+            r_left_pj_e_avg.append(smooth(np.squeeze(r_left_pj_e[pv_idx], axis=0), np.round(win_ms/dt)))
+
+        Data_at_each_bin.append(np.zeros((2,2)))
+        Data_at_each_bin[pv_idx + 3][0,0] = r_right_pj_e_avg[pv_idx][bin_3]
+        Data_at_each_bin[pv_idx + 3][0,1] = r_right_pj_e_avg[pv_idx][bin_4]
+        Data_at_each_bin[pv_idx + 3][1,0] = r_left_pj_e_avg[pv_idx][bin_3]
+        Data_at_each_bin[pv_idx + 3][1,1] = r_left_pj_e_avg[pv_idx][bin_4]
+        mean_proj.append(r_right_pj_e_avg[pv_idx])
+        mean_proj.append(r_left_pj_e_avg[pv_idx])
+
+        bin_pre_stim = np.nonzero(t_vec_plt>-2.05)[0][0]
+
+        cor_right = r_right_pj_e[pv_idx][:, bin_pre_stim] > 0.5
+        cor_left = r_left_pj_e[pv_idx][:, bin_pre_stim] < 0.5
+        
+        r_right_temp = smooth(np.mean(r_right_pj_e[pv_idx][cor_right, :], axis = 0), np.round(win_ms/dt))
+        r_left_temp = smooth(np.mean(r_left_pj_e[pv_idx][cor_left, :], axis = 0), np.round(win_ms/dt))
+
+        right_data_tmp = r_right_temp[::int(1/dt)]
+        left_data_tmp = r_left_temp[::int(1/dt)]
+
+        mean_cor_proj.append(right_data_tmp)
+        mean_cor_proj.append(left_data_tmp)
+
+    ax5.plot(t_vec_plt, r_smooth_right_pj[0], color = 'tab:blue', linestyle = '--')
+    ax5.plot(t_vec_plt, r_smooth_left_pj[0], color = 'tab:red', linestyle = '--')
+
+    ax5.axvline((t_stim_start - t_delay_end)*dt/1000, color = "black", linestyle = "--")
+    ax5.axvline((t_stim_end - t_delay_end)*dt/1000, color = "black", linestyle = "--")
+    ax5.axvline(0, color = "black", linestyle = "--")
+
+    ax5.set_ylabel('Proj. to CD')
+    ax5.set_xlabel('Time to movement onset (s)')
+    ax5.set_title('Perturbed error trials')
+    fig5.tight_layout()
+    
+    plt.savefig('./figures/perturbed_error.png')
+    plt.close()
+    
+    # Error trial histogram
+    r_right_pj_e_mat = np.concatenate(r_right_pj_e[1:], axis = 0)
+    r_left_pj_e_mat = np.concatenate(r_left_pj_e[1:], axis = 0)
+
+    hist_pv_rt, bin_pv_rt = np.histogram(r_right_pj_e_mat[:, int(t_delay_end)], bins = \
+        np.arange(-1.5, 2.5, 0.1) + 0.05)
+    hist_pv_rt_center = bin_pv_rt[0:-1] + (bin_pv_rt[1] - bin_pv_rt[0])/2
+    hist_pv_rt_width = (bin_pv_rt[1] - bin_pv_rt[0])*0.8
+    
+    hist_pv_lt, bin_pv_lt = np.histogram(r_left_pj_e_mat[:, int(t_delay_end)], bins = \
+        np.arange(-1.5, 2.5, 0.1) + 0.05)
+    hist_pv_lt_center = bin_pv_lt[0:-1] + (bin_pv_lt[1] - bin_pv_lt[0])/2
+    hist_pv_lt_width = (bin_pv_lt[1] - bin_pv_lt[0])*0.8
+
+    fig6, ax6 = plt.subplots()
+    
+    ax6.bar(hist_pv_rt_center, hist_pv_rt/np.shape(r_right_pj_e_mat)[0], align= 'center', \
+        width = hist_pv_rt_width, color = 'tab:blue', label = 'right')
+    ax6.bar(hist_pv_lt_center, hist_pv_lt/np.shape(r_left_pj_e_mat)[0], align = 'center', \
+        width = hist_pv_lt_width, color = 'tab:red', label = 'left')
+    
+    ax6.set_xlabel('Fraction of error trials')
+    ax6.set_ylabel('Proj. to CD')
+    ax6.set_title('Endpoint distribution - pertubed error trials')
+    ax6.legend()
+    fig6.tight_layout()
+
+    plt.savefig('./figures/perturbed_error_trial_hist.png')
+    plt.close()
+
+    # Trial-to-trial fluctuations
+    norm_var_right = np.std(r_right_pj_c[0], axis=0) / np.std(r_right_pj_c[0][:, int(t_stim_end)], axis=0)
+    norm_var_left = np.std(r_left_pj_c[0], axis=0) / np.std(r_left_pj_c[0][:, int(t_stim_end)], axis=0)
+    
+    fig7, ax7 = plt.subplots()
+
+    ax7.plot(t_vec_plt, norm_var_right, color = 'tab:blue')
+    ax7.plot(t_vec_plt, norm_var_left, color = 'tab:red')
+    ax7.set_xlabel('Time to movement onset (s)')
+    ax7.set_ylabel('Changes in across-trials fluc. of proj. to CD')
+    ax7.set_title('Trial-averaged fluctuations')
+    fig7.tight_layout()
+
+    plt.savefig('./figures/trial_fluctions.png')
+    plt.close()
+    #print(np.shape(r_right_pj_c[0]))
+    # plot change in Delta
+
 
     return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
+
+
 
 
 def smooth(a,WSZ):
