@@ -395,10 +395,43 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
 
     plt.savefig('./figures/trial_fluctions.png')
     plt.close()
-    #print(np.shape(r_right_pj_c[0]))
+
     # plot change in Delta
 
+    title_list = ['0.1mW correct', '0.2mW correct', '0.3mW correct', 'incorrect']
+    fig8, ax8 = plt.subplots(1, 4, sharey=True)
 
+    for idx in range(4):
+        if idx < 3:
+            data_1 = (abs(Data_at_each_bin[idx + 1][0, 0] - Data_at_each_bin[0][0, 0]) + \
+                abs(Data_at_each_bin[idx +1][1, 0] - Data_at_each_bin[0][1,0])) / 2
+            data_2 = (abs(Data_at_each_bin[idx + 1][0, 1] - Data_at_each_bin[0][0,1]) + \
+                abs(Data_at_each_bin[idx + 1][1, 1] - Data_at_each_bin[0][1,1])) / 2
+        else:
+            data_bin1_C_tmp = np.nanmean([Data_at_each_bin[4][0,0], Data_at_each_bin[5][0,0], \
+                Data_at_each_bin[6][0,0]])
+            data_bin1_I_tmp = np.nanmean([Data_at_each_bin[4][1,0], Data_at_each_bin[5][1,0], \
+                Data_at_each_bin[6][1,0]])
+            data_bin2_C_tmp = np.nanmean([Data_at_each_bin[4][0,1], Data_at_each_bin[5][1,0], \
+                Data_at_each_bin[6][1,0]])
+            data_bin2_I_tmp = np.nanmean([Data_at_each_bin[4][1,1], Data_at_each_bin[5][1,1], \
+                Data_at_each_bin[6][1,1]])
+
+            data_1 = (abs(data_bin1_C_tmp - Data_at_each_bin[0][0,0]) + \
+                abs(data_bin1_I_tmp - Data_at_each_bin[0][1,0])) / 2
+            data_2 = (abs(data_bin2_C_tmp - Data_at_each_bin[0][0,1]) + \
+                abs(data_bin2_I_tmp - Data_at_each_bin[0][1,1])) / 2
+        ax8[idx].set_title(title_list[idx])
+        ax8[idx].plot([data_1, data_2], 'ko-')
+        ax8[idx].set_ylim([0, 1])
+        
+    ax8[0].set_ylabel('Delta proj')
+    
+    fig8.tight_layout()
+    plt.savefig('./figures/delta_proj.png')
+    plt.close()
+    
+    # TODO, plot phase line, there's seperated m script file in original code.
     return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
 
 
