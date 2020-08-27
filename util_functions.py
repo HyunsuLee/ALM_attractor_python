@@ -288,8 +288,8 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
         r_right_pj_e.append(np.zeros((len(error_trials_right[pv_idx]), len(t_vec)))) 
         r_left_pj_e.append(np.zeros((len(error_trials_left[pv_idx]), len(t_vec))))
 
-        r_right_pj_e_avg.append(np.zeros((len(t_vec), 1)))
-        r_left_pj_e_avg.append(np.zeros((len(t_vec), 1)))
+        r_right_pj_e_avg.append(np.zeros((len(t_vec))))
+        r_left_pj_e_avg.append(np.zeros((len(t_vec))))
 
         for idx in range(len(error_trials_right[pv_idx])):
             r_right_pj_e[pv_idx][idx, :] = (np.matmul(r_right_e[pv_idx][idx][:][:], CD_delay) - left_norm) / \
@@ -304,14 +304,18 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
             ax5.plot(t_vec_plt, r_right_pj_e_avg[pv_idx], \
                 color = (0.1, 0.3, (6 - pv_idx)/(len(pv_vec) + 3), (8 - pv_idx)/(len(pv_vec) + 4)))
         elif len(error_trials_right[pv_idx]) == 1:
-            r_right_pj_e_avg.append(smooth(np.squeeze(r_right_pj_e[pv_idx], axis=0), np.round(win_ms/dt)))
+            r_right_pj_e_avg.append(smooth(np.squeeze(r_right_pj_e[pv_idx]), np.round(win_ms/dt)))
+        else:
+            print(len(error_trials_right[pv_idx]))
         
         if len(error_trials_left[pv_idx]) > 1:
             r_left_pj_e_avg.append(smooth(np.mean(r_left_pj_e[pv_idx], axis = 0), np.round(win_ms/dt)))
             ax5.plot(t_vec_plt, r_left_pj_e_avg[pv_idx], \
                 color = ((6 - pv_idx)/(len(pv_vec) + 3), 0.1, 0.4, (8 - pv_idx)/(len(pv_vec) + 4)))
         elif len(error_trials_left[pv_idx]) == 1:
-            r_left_pj_e_avg.append(smooth(np.squeeze(r_left_pj_e[pv_idx], axis=0), np.round(win_ms/dt)))
+            r_left_pj_e_avg.append(smooth(np.squeeze(r_left_pj_e[pv_idx]), np.round(win_ms/dt)))
+        else:
+            print(len(error_trials_left[pv_idx]))
 
         Data_at_each_bin.append(np.zeros((2,2)))
         Data_at_each_bin[pv_idx + 3][0,0] = r_right_pj_e_avg[pv_idx][bin_3]
@@ -431,17 +435,35 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
     plt.savefig('./figures/delta_proj.png')
     plt.close()
     
-    # TODO, plot phase line, there's seperated m script file in original code.
+    # Plot phase line
+    mean_proj_to_plot = []
+
+    for idx in range(10):
+        if idx < 8:
+            mean_proj_to_plot.append(mean_proj[idx].T)
+        else:
+            mean_proj_to_plot.append(np.nanmean([mean_proj[idx], mean_proj[idx+2], mean_proj[idx+4]], \
+                axis = 0).T)
+    
+    modes = [0, 2, 4, 6, 8, 1, 3, 5, 7, 9]
+
+    t_pl_start = -1.25
+
+    [f1, var_proj] = plot_phase_line(t_pl_start, t_vec_plt, mean_proj_to_plot, modes)
+            
+
     return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
 
 
 
 
 def smooth(a,WSZ):
-    # a: NumPy 1-D array containing the data to be smoothed
-    # WSZ: smoothing window size needs, which must be odd number,
-    # as in the original MATLAB implementation
-    # source: https://stackoverflow.com/questions/40443020/matlabs-smooth-implementation-n-point-moving-average-in-numpy-python
+    '''
+    a: NumPy 1-D array containing the data to be smoothed
+    WSZ: smoothing window size needs, which must be odd number,
+    as in the original MATLAB implementation
+    source: https://stackoverflow.com/questions/40443020/matlabs-smooth-implementation-n-point-moving-average-in-numpy-python
+    '''
     if WSZ%2 == 0:
         WSZ = int(WSZ) - 1
     else:
@@ -451,3 +473,27 @@ def smooth(a,WSZ):
     start = np.cumsum(a[:WSZ-1])[::2]/r
     stop = (np.cumsum(a[:-WSZ:-1])[::2]/r)[::-1]
     return np.concatenate((  start , out0, stop  ))
+
+def plot_phase_line(t_pl_start, t_vec_plt, mean_proj_to_plot, modes):
+    '''
+    '''
+    x_ax = np.arange(-10, 10, 0.2)
+
+    num_btstrap = mean_proj_to_plot[0].shape[0]
+    num_modes = len(modes)
+
+    f1 = 0
+    var_proj = 0
+    return [f1, var_proj]
+'''
+    for idx in range(num_btstrap):
+        proj_per_tmp = np.empty((num_modes, len(t_vec_plt)))
+        proj_per_tmp[:] = np.NaN
+        for m_idx in range(num_modes):
+            mm_idx = modes[m_idx]
+            
+            #proj_per_tmp[m_idx, :] = mean_proj_to_plot[modes[m_idx]][idx, :]
+            #proj_per_tmp[m_idx, :]
+
+            '''
+
