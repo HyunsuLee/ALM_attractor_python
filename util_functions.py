@@ -434,7 +434,9 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
     fig8.tight_layout()
     plt.savefig('./figures/delta_proj.png')
     plt.close()
-    
+
+    return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
+    '''
     # Plot phase line
     mean_proj_to_plot = []
 
@@ -450,9 +452,9 @@ def ALM_attractor_figs(r_mat, pv_vec, t_vec, dt, t_stim_start, t_stim_end, t_del
     t_pl_start = -1.25
 
     [f1, var_proj] = plot_phase_line(t_pl_start, t_vec_plt, mean_proj_to_plot, modes)
-            
+    '''
 
-    return [correct_trials_right, correct_trials_left, r_right_pj_c, r_left_pj_c]
+
 
 
 
@@ -473,19 +475,12 @@ def smooth(a,WSZ):
     start = np.cumsum(a[:WSZ-1])[::2]/r
     stop = (np.cumsum(a[:-WSZ:-1])[::2]/r)[::-1]
     return np.concatenate((  start , out0, stop  ))
-
+'''
 def plot_phase_line(t_pl_start, t_vec_plt, mean_proj_to_plot, modes):
-    '''
-    '''
     x_ax = np.arange(-10, 10, 0.2)
 
     num_btstrap = mean_proj_to_plot[0].shape[0]
     num_modes = len(modes)
-
-    f1 = 0
-    var_proj = 0
-    return [f1, var_proj]
-'''
     for idx in range(num_btstrap):
         proj_per_tmp = np.empty((num_modes, len(t_vec_plt)))
         proj_per_tmp[:] = np.NaN
@@ -494,6 +489,11 @@ def plot_phase_line(t_pl_start, t_vec_plt, mean_proj_to_plot, modes):
             
             #proj_per_tmp[m_idx, :] = mean_proj_to_plot[modes[m_idx]][idx, :]
             #proj_per_tmp[m_idx, :]
+    f1 = 0
+    var_proj = 0
+    return [f1, var_proj]
+'''
+
 
             '''
 
